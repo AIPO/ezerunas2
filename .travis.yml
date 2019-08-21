@@ -1,24 +1,19 @@
-os:
-    - linux
+language: php
 
-    language: php
+php:
+  - 7.2.1
 
-    php:
-    - '7.1'
+addons:
+  mariadb: '10.1'
 
-    before_script:
-    - composer self-update
-    - composer install --no-interaction
-    - cp .env.travis .env
-    - pear install pear/PHP_CodeSniffer
-    - phpenv rehash
-    - nvm install 7.7.1
-    - npm install npm@latest -g
-    - npm install -g jshint
-    - npm install
+before_script:
+  - cp .env.travis .env
+  - mysql -e 'create database homestead_test;'
+  - composer self-update
+  - composer install --no-interaction
+  - rm vendor/nzesalem/lastus/src/migrations/2017_10_18_124315_add_status_field_to_users_table.php
+  - php artisan key:generate
+  - php artisan migrate --step
 
-    script:
-    - vendor/bin/phpunit --coverage-text
-    - phpcs --ignore=app/Http/Controllers/Auth,app/Http/Controllers/Controller.php app/Http/Controllers
-    - npm run production
-    - jshint resources/assets/js/modules/*
+script:
+  - vendor/bin/phpunit
